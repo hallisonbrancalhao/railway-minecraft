@@ -1,0 +1,58 @@
+Minecraft Control UI License (No-Competing-Templates) v1.0
+
+Copyright (c) 2026 Thalles Passos
+
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of this software and associated documentation files (the
+"Software"), to use, copy, modify, merge, publish, and distribute the Software,
+including for commercial purposes, subject to the following conditions:
+
+1. Attribution
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+2. No Competing Templates / Starters
+   You may not use, publish, distribute, sublicense, sell, or otherwise make
+   available the Software (or any Derivative Work) as part of a Template.
+
+   For purposes of this license:
+   - "Template" means any repository, package, project, or distribution whose
+     primary purpose is to provide a reusable starter/template/boilerplate for
+     deploying, hosting, or managing Minecraft servers (including but not
+     limited to Railway templates, "one-click deploy" templates, marketplace
+     templates, starter kits, or template generators).
+   - "Derivative Work" means any work based on the Software that is modified,
+     adapted, or combined with other software such that it contains a
+     substantial portion of the Software.
+
+   This restriction is intended to prevent other Minecraft template creators
+   from using this dashboard/control UI to create or seed their own competing
+   templates/starters. It does NOT restrict running the Software for your own
+   Minecraft server(s) or integrating it into a non-template product.
+
+3. Contributions
+   Any contribution intentionally submitted for inclusion in the Software (for
+   example via pull request, patch, or issue attachment) is licensed by the
+   contributor under the terms of this license, without any additional terms or
+   conditions, unless the contributor explicitly states otherwise in writing at
+   the time of submission.
+
+4. Exceptions / Additional Permission (By Written Approval Only)
+   If you want to use the Software as part of a Template (as defined above), you
+   must contact the copyright holder and obtain explicit written permission
+   (i.e., a separate license grant) before doing so.
+
+   Permission is granted solely at the copyright holder's discretion, and there
+   is no guarantee that permission will be provided.
+
+   Contact (Discord): thallescomh
+
+DISCLAIMER:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+

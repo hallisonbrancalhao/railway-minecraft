@@ -1,0 +1,25 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"files": {
+		"includes": ["**", "!dist", "!src/components/ui", "!**/*.css"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noImportantStyles": "off"
+			},
+			"suspicious": {
+				"noUnknownAtRules": "off"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "off"
+			}
+		}
+	}
+}

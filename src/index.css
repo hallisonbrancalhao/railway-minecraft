@@ -1,0 +1,302 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Control-room dark: hairlines + acid accent */
+    --background: 240 14% 4%;
+    --foreground: 240 9% 92%;
+    --card: 240 14% 10%;
+    --card-foreground: 240 9% 92%;
+    --popover: 240 14% 10%;
+    --popover-foreground: 240 9% 92%;
+    --primary: 67 100% 67%;
+    --primary-foreground: 240 14% 7%;
+    --secondary: 240 12% 13%;
+    --secondary-foreground: 240 9% 92%;
+    --muted: 240 12% 12%;
+    --muted-foreground: 240 6% 66%;
+    --accent: 240 12% 13%;
+    --accent-foreground: 240 9% 92%;
+    --destructive: 0 72% 44%;
+    --destructive-foreground: 240 9% 92%;
+    --border: 240 12% 20%;
+    --input: 240 12% 20%;
+    --ring: 67 100% 67%;
+    --radius: 0.85rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Recursive",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    font-variation-settings: "opsz" 14, "wght" 410, "CASL" 0.08, "slnt" 0,
+      "CRSV" 0;
+    letter-spacing: -0.01em;
+    text-rendering: geometricPrecision;
+    caret-color: hsl(var(--foreground) / 0.85);
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.22);
+  }
+}
+
+@layer components {
+  .dash-bg {
+    position: relative;
+    background:
+      radial-gradient(900px 600px at 18% 16%, rgba(215, 255, 90, 0.055), transparent 55%),
+      radial-gradient(1000px 700px at 82% 28%, rgba(120, 161, 255, 0.045), transparent 55%),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent 22%),
+      linear-gradient(
+        rgba(255, 255, 255, 0.028) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px
+      );
+    background-size:
+      auto,
+      auto,
+      auto,
+      32px 32px,
+      32px 32px;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 -1px,
+      -1px 0;
+  }
+
+  .dash-shell {
+    @apply mx-auto w-full max-w-[1220px] px-5 py-8 sm:px-6;
+  }
+
+  .dash-topbar {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .dash-kicker {
+    @apply text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground;
+    font-variation-settings: "opsz" 14, "wght" 520, "CASL" 0.03, "slnt" 0,
+      "CRSV" 0;
+  }
+
+  .dash-title {
+    @apply mt-2 text-[28px] leading-[1.05] sm:text-[34px];
+    font-variation-settings: "opsz" 28, "wght" 760, "CASL" 0.04, "slnt" 0,
+      "CRSV" 0;
+    letter-spacing: -0.03em;
+  }
+
+  .dash-sub {
+    @apply mt-2 max-w-[58ch] text-sm leading-relaxed text-muted-foreground;
+  }
+
+  .dash-chip {
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[12px] text-foreground/90;
+    border-color: hsl(var(--border) / 0.9);
+    background: hsl(var(--card));
+  }
+
+  .dash-key {
+    @apply inline-flex items-center rounded-lg border px-2 py-0.5 font-medium text-[11px] text-foreground/90;
+    border-color: hsl(var(--border) / 0.9);
+    background: hsl(var(--background));
+    font-variation-settings: "opsz" 14, "wght" 640, "CASL" 0.03, "slnt" 0,
+      "CRSV" 0;
+    letter-spacing: 0.02em;
+  }
+
+  .dash-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+    background: hsl(var(--primary) / 0.95);
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.12);
+  }
+
+  .dash-dot--connecting {
+    background: hsl(var(--muted-foreground) / 0.75);
+    box-shadow: 0 0 0 4px hsl(var(--muted-foreground) / 0.1);
+  }
+
+  .dash-dot--error {
+    background: hsl(var(--destructive) / 0.9);
+    box-shadow: 0 0 0 4px hsl(var(--destructive) / 0.12);
+  }
+
+  .dash-nav {
+    @apply mt-7 flex flex-wrap gap-2;
+  }
+
+  .dash-navbtn {
+    @apply inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition;
+    border-color: hsl(var(--border) / 0.9);
+    background: hsl(var(--card));
+    color: hsl(var(--foreground) / 0.86);
+  }
+
+  .dash-navbtn:hover {
+    border-color: hsl(var(--foreground) / 0.18);
+    background: hsl(var(--secondary));
+  }
+
+  .dash-navbtn[aria-current="page"] {
+    border-color: hsl(var(--primary) / 0.4);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.14),
+      hsl(var(--primary) / 0.06)
+    );
+    color: hsl(var(--foreground));
+  }
+
+  .dash-surface {
+    @apply rounded-2xl border;
+    border-color: hsl(var(--border) / 0.88);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card)) 60%,
+      hsl(var(--card) / 0.94) 100%
+    );
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.03) inset,
+      0 10px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .dash-panelhead {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4;
+    border-color: hsl(var(--border) / 0.75);
+  }
+
+  .dash-paneltitle {
+    @apply text-sm text-foreground/90;
+    font-variation-settings: "opsz" 14, "wght" 640, "CASL" 0.03, "slnt" 0,
+      "CRSV" 0;
+    letter-spacing: -0.01em;
+  }
+
+  .dash-split {
+    @apply mt-6 grid gap-4 lg:grid-cols-[1.7fr_1fr];
+  }
+
+  .dash-bodypad {
+    @apply p-5;
+  }
+
+  .dash-mutedbox {
+    @apply rounded-xl border px-4 py-3 text-sm text-muted-foreground;
+    border-color: hsl(var(--border) / 0.88);
+    background: hsl(var(--background));
+  }
+
+  .dash-row {
+    @apply flex items-center justify-between gap-3 rounded-xl border px-3 py-2 transition;
+    border-color: hsl(var(--border) / 0.85);
+    background: hsl(var(--card));
+  }
+
+  .dash-row:hover {
+    border-color: hsl(var(--foreground) / 0.16);
+    background: hsl(var(--secondary));
+  }
+
+  .dash-row[data-selected="true"] {
+    border-color: hsl(var(--primary) / 0.35);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.11),
+      hsl(var(--primary) / 0.05)
+    );
+  }
+
+  .dash-appear {
+    animation: dash-in 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes dash-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ghostty-console {
+    display: flex;
+    position: relative;
+  }
+
+  .ghostty-console--inset {
+    padding: 4px;
+    box-sizing: border-box;
+  }
+
+  .ghostty-console > * {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .ghostty-console--inset > * {
+    width: calc(100% - 8px) !important;
+    height: calc(100% - 8px) !important;
+    margin: 4px !important;
+  }
+
+  .ghostty-console canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .ghostty-console textarea,
+  .ghostty-console input {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    caret-color: transparent;
+    clip-path: inset(50%);
+  }
+}

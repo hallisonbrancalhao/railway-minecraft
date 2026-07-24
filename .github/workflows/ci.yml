@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# There are no tests in this repo. The real gates are lint, typecheck, and the
+# two builds — including the Docker build, which is what actually verifies the
+# pinned server.jar still matches its SHA1.
+jobs:
+  check:
+    name: lint · typecheck · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run lint
+
+      - run: bun run typecheck
+
+      - run: bun run build
+
+      - name: Fail if src/tailwind.css is stale
+        run: |
+          if ! git diff --quiet -- src/tailwind.css; then
+            echo "::error::src/tailwind.css is a committed build artifact and is out of date."
+            echo "Run 'bun run build:css' and commit the result."
+            git diff --stat -- src/tailwind.css
+            exit 1
+          fi
+
+  image:
+    name: docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds all three stages, so a wrong MC_SERVER_SHA1 or an unreachable
+      # jar URL fails here instead of on someone's deploy.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

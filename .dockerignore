@@ -1,0 +1,32 @@
+# Keep the build context small. The Dockerfile copies only what it needs
+# (src + the build configs), but everything here would still be uploaded to the
+# builder without this file.
+
+node_modules
+dist
+out
+coverage
+
+.git
+.github
+.cursor
+.claude
+
+# Local runtime data — never bake a world into the image.
+data
+logs
+*.log
+
+.env
+.env.*
+
+.DS_Store
+*.tgz
+*.tsbuildinfo
+.cache
+
+# Docs and leftovers are not part of the build.
+README.md
+CLAUDE.md
+LICENSE
+docker
