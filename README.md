@@ -31,6 +31,11 @@ variables, volumes, or networking. Everything below must be set in the composer 
 5. **Networking → TCP Proxy** — expose port `25565` so players can connect. Railway then fills
    `RAILWAY_TCP_PROXY_DOMAIN` / `RAILWAY_TCP_PROXY_PORT`, which the panel displays as the join
    address.
+6. **Set `PORT=3000` as a service variable.** Required as soon as step 5 is done, and the failure
+   is nasty if you skip it: adding the TCP proxy makes Railway set `PORT=25565`, which is the
+   *game* port. The panel would bind it first, Minecraft would crash-loop on "address already in
+   use", the site would 502 and the server would be unreachable. The app refuses to bind the
+   Minecraft port, and pinning `PORT` keeps Railway's HTTP routing and health check on the panel.
 
 ### Why the deploy settings in `railway.json` matter
 

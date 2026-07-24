@@ -147,6 +147,17 @@ world. Railway service env vars also override Dockerfile `ENV`.
 gives every template user a 502 plus a failing health check. Do not "simplify" this back to
 `CONTROL_PORT`.
 
+**…but adding the TCP proxy makes Railway set `PORT` to the proxied target (25565).** That is the
+Minecraft port, not the panel's. This actually happened: the panel bound 25565 (its `Bun.serve`
+runs before `startServer()`, so it wins the race), Minecraft then crash-looped on "address already
+in use", the site 502'd, and the game port went dead. `getControlPort()` therefore skips any
+candidate equal to `getMCServerPort()`.
+
+The code guard alone is not enough, because Railway also health-checks `PORT`. **A deployment with
+a TCP proxy must set `PORT=3000` as an explicit service variable** — that pins the HTTP side to the
+panel and leaves the proxy to forward 25565 on its own. Document this for anyone deploying the
+template; it is not discoverable from the error.
+
 `railway.json` carries build/deploy settings only — the schema has exactly four top-level keys
 (`$schema`, `build`, `deploy`, `environments`) with `additionalProperties: false`, and **no field
 for variables, volumes, or TCP proxy**. Those are configured in Railway's template composer UI;
