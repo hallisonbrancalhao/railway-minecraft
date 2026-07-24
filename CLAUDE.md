@@ -171,3 +171,14 @@ TypeScript strict is on, plus `noUncheckedIndexedAccess` and `noImplicitOverride
 follow a consistent shape: `ensureAuth` → `try` → `json({...})` / `json({ error }, { status })`;
 errors are never thrown out of a handler. Zod schemas validate every external payload (Railway
 GraphQL, OAuth, Minecraft ping) — keep that pattern for new external calls.
+
+**`Bun.serve` has an `error()` handler and it is load-bearing.** Without it Bun answers an uncaught
+throw with its default error page, which embeds the *compiled source* around the throw site — this
+actually shipped and leaked `src/index.ts` to the browser from `/api/auth/redirect`. Never remove
+it, and never rely on it either: handlers still catch their own errors.
+
+**Railway rate-limits `POST /oauth/register` (429).** Dynamic client registration only persists to
+`/data/.railway-oauth-client.json` on success, so a naive retry-per-request keeps the limit
+saturated forever. `getRailwayOAuthClient()` remembers a failure for
+`RAILWAY_OAUTH_REGISTER_COOLDOWN_MS` and replays it without a network call. `RAILWAY_CLIENT_ID` /
+`RAILWAY_CLIENT_SECRET` are the escape hatch when registration cannot succeed at all.
