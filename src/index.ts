@@ -338,13 +338,20 @@ const getMCServerPort = () => {
 
 const getControlPort = () => {
 	// PORT first: Railway ignores the Dockerfile's EXPOSE and sends public traffic
-	// to the PORT it injects, so binding anywhere else answers nobody (502). The
-	// health check targets the same value. CONTROL_PORT stays the local override.
-	const port = Number.parseInt(
-		env.PORT ?? env.CONTROL_PORT ?? env.APP_PORT ?? "3000",
-		10,
-	);
-	return Number.isNaN(port) ? 3000 : port;
+	// to the PORT it injects, so binding anywhere else answers nobody (502).
+	//
+	// But adding a TCP proxy for Minecraft makes Railway set PORT to *that*
+	// target (25565). Binding it would steal the port from the server we
+	// supervise — the panel wins the race (Bun.serve runs before startServer)
+	// and Minecraft then crash-loops on "address already in use". So a PORT that
+	// collides with the game port is not ours, and we fall through.
+	const minecraftPort = getMCServerPort();
+	for (const candidate of [env.PORT, env.CONTROL_PORT, env.APP_PORT]) {
+		const parsed = Number.parseInt(candidate ?? "", 10);
+		if (Number.isNaN(parsed) || parsed === minecraftPort) continue;
+		return parsed;
+	}
+	return 3000;
 };
 
 type ConsoleLogSocketData = {
