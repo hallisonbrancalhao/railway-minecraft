@@ -576,6 +576,14 @@ type OAuthPkceSession = {
 
 const oauthPkceSessions = new Map<string, OAuthPkceSession>();
 
+/** Railway rate-limits POST /oauth/register; back off instead of hammering it. */
+const RAILWAY_OAUTH_REGISTER_COOLDOWN_MS = 60_000;
+let railwayOAuthRegistrationError: Error | null = null;
+let railwayOAuthRegistrationBlockedUntil = 0;
+
+const isRateLimited = (error: unknown) =>
+	error instanceof Error && error.message.includes("(429)");
+
 let railwayOAuthClientCache: RailwayOAuthClient | null = null;
 let railwayOAuthClientInFlight: Promise<RailwayOAuthClient> | null = null;
 
@@ -700,12 +708,28 @@ const getRailwayOAuthClient = async () => {
 			return persisted;
 		}
 
+		// Retrying on every sign-in click is precisely what keeps Railway's rate
+		// limit saturated, so a failed registration is remembered for a cooldown
+		// and replayed without touching the network.
+		if (
+			railwayOAuthRegistrationError &&
+			railwayOAuthRegistrationBlockedUntil > Date.now() &&
+			!env.RAILWAY_CLIENT_ID
+		) {
+			throw railwayOAuthRegistrationError;
+		}
+
 		try {
 			const dynamicClient = await registerRailwayOAuthClient();
+			railwayOAuthRegistrationError = null;
 			railwayOAuthClientCache = dynamicClient;
 			return dynamicClient;
 		} catch (error) {
-			if (!env.RAILWAY_CLIENT_ID) throw error;
+			railwayOAuthRegistrationError =
+				error instanceof Error ? error : new Error(String(error));
+			railwayOAuthRegistrationBlockedUntil =
+				Date.now() + RAILWAY_OAUTH_REGISTER_COOLDOWN_MS;
+			if (!env.RAILWAY_CLIENT_ID) throw railwayOAuthRegistrationError;
 			const fromEnv: RailwayOAuthClient = {
 				clientId: env.RAILWAY_CLIENT_ID,
 				clientSecret: env.RAILWAY_CLIENT_SECRET ?? null,
@@ -741,29 +765,51 @@ const server = Bun.serve<ConsoleLogSocketData>({
 	// from outside its loopback.
 	hostname: "0.0.0.0",
 	maxRequestBodySize: MAX_UPLOAD_BYTES,
+	// Without this, an uncaught throw in any handler makes Bun serve its default
+	// error page — which embeds the compiled source around the throw site. That
+	// must never reach a browser on a public deployment.
+	error(error: Error) {
+		console.error("Unhandled request error:", formatUnknownError(error));
+		return json({ error: "Internal server error." }, { status: 500 });
+	},
 	routes: {
 		"/api/auth/redirect": {
-			GET: async () => {
-				const client = await getRailwayOAuthClient();
-				const codeVerifier = createCodeVerifier();
-				const codeChallenge = createCodeChallenge(codeVerifier);
-				const state = randomBytes(32).toString("hex");
-				oauthPkceSessions.set(state, {
-					codeVerifier,
-					expiresAt: Date.now() + PKCE_SESSION_TTL_MS,
-				});
-				prunePkceSessions();
+			GET: async (req: Request) => {
+				try {
+					const client = await getRailwayOAuthClient();
+					const codeVerifier = createCodeVerifier();
+					const codeChallenge = createCodeChallenge(codeVerifier);
+					const state = randomBytes(32).toString("hex");
+					oauthPkceSessions.set(state, {
+						codeVerifier,
+						expiresAt: Date.now() + PKCE_SESSION_TTL_MS,
+					});
+					prunePkceSessions();
 
-				const url = new URL("https://backboard.railway.com/oauth/auth");
-				url.searchParams.append("response_type", "code");
-				url.searchParams.append("client_id", client.clientId);
-				url.searchParams.append("redirect_uri", client.redirectUri);
-				url.searchParams.append("scope", RAILWAY_OAUTH_SCOPE);
-				url.searchParams.append("code_challenge", codeChallenge);
-				url.searchParams.append("code_challenge_method", "S256");
-				url.searchParams.append("state", state);
+					const url = new URL("https://backboard.railway.com/oauth/auth");
+					url.searchParams.append("response_type", "code");
+					url.searchParams.append("client_id", client.clientId);
+					url.searchParams.append("redirect_uri", client.redirectUri);
+					url.searchParams.append("scope", RAILWAY_OAUTH_SCOPE);
+					url.searchParams.append("code_challenge", codeChallenge);
+					url.searchParams.append("code_challenge_method", "S256");
+					url.searchParams.append("state", state);
 
-				return Response.redirect(url, 302);
+					return Response.redirect(url, 302);
+				} catch (error) {
+					// Getting an OAuth client can fail (Railway rate-limits dynamic
+					// registration). Send the operator back to a readable message
+					// instead of letting the error escape into Bun's error page.
+					console.error("OAuth redirect failed:", formatUnknownError(error));
+					const redirectTo = new URL("/", req.url);
+					redirectTo.searchParams.set(
+						"auth_error",
+						isRateLimited(error)
+							? "Railway is rate limiting OAuth app registration. Wait a few minutes and try again, or set RAILWAY_CLIENT_ID and RAILWAY_CLIENT_SECRET."
+							: "Could not start sign-in. Check the server logs for details.",
+					);
+					return Response.redirect(redirectTo, 302);
+				}
 			},
 		},
 		"/api/auth/callback": {
